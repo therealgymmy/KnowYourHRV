@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AC8BC2A32FBD21C40090F6DC /* KnowYourHRV Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = AC8BC2A22FBD21C40090F6DC /* KnowYourHRV Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AC8BC2C92FBD30000090F6DC /* KnowYourHRV Complication.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AC8BC2C82FBD30000090F6DC /* KnowYourHRV Complication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -18,9 +19,27 @@
 			remoteGlobalIDString = AC8BC2A12FBD21C40090F6DC;
 			remoteInfo = "KnowYourHRV Watch App";
 		};
+		AC8BC2CA2FBD30000090F6DC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AC8BC2962FBD21C30090F6DC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AC8BC2C72FBD30000090F6DC;
+			remoteInfo = "KnowYourHRV Complication";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		AC8BC2CC2FBD30000090F6DC /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AC8BC2C92FBD30000090F6DC /* KnowYourHRV Complication.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AC8BC2B22FBD21C50090F6DC /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -37,7 +56,18 @@
 /* Begin PBXFileReference section */
 		AC8BC29C2FBD21C40090F6DC /* KnowYourHRV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KnowYourHRV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC8BC2A22FBD21C40090F6DC /* KnowYourHRV Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KnowYourHRV Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC8BC2C82FBD30000090F6DC /* KnowYourHRV Complication.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "KnowYourHRV Complication.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AC8BC2D32FBD30000090F6DC /* Exceptions for "KnowYourHRV Complication" folder in "KnowYourHRV Complication" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = AC8BC2C72FBD30000090F6DC /* KnowYourHRV Complication */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AC8BC2A62FBD21C40090F6DC /* KnowYourHRV Watch App */ = {
@@ -45,10 +75,25 @@
 			path = "KnowYourHRV Watch App";
 			sourceTree = "<group>";
 		};
+		AC8BC2C62FBD30000090F6DC /* KnowYourHRV Complication */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AC8BC2D32FBD30000090F6DC /* Exceptions for "KnowYourHRV Complication" folder in "KnowYourHRV Complication" target */,
+			);
+			path = "KnowYourHRV Complication";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AC8BC29F2FBD21C40090F6DC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AC8BC2CE2FBD30000090F6DC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -62,6 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				AC8BC2A62FBD21C40090F6DC /* KnowYourHRV Watch App */,
+				AC8BC2C62FBD30000090F6DC /* KnowYourHRV Complication */,
 				AC8BC29D2FBD21C40090F6DC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -71,6 +117,7 @@
 			children = (
 				AC8BC29C2FBD21C40090F6DC /* KnowYourHRV.app */,
 				AC8BC2A22FBD21C40090F6DC /* KnowYourHRV Watch App.app */,
+				AC8BC2C82FBD30000090F6DC /* KnowYourHRV Complication.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,10 +151,12 @@
 				AC8BC29E2FBD21C40090F6DC /* Sources */,
 				AC8BC29F2FBD21C40090F6DC /* Frameworks */,
 				AC8BC2A02FBD21C40090F6DC /* Resources */,
+				AC8BC2CC2FBD30000090F6DC /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AC8BC2CB2FBD30000090F6DC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AC8BC2A62FBD21C40090F6DC /* KnowYourHRV Watch App */,
@@ -118,6 +167,28 @@
 			productName = "KnowYourHRV Watch App";
 			productReference = AC8BC2A22FBD21C40090F6DC /* KnowYourHRV Watch App.app */;
 			productType = "com.apple.product-type.application";
+		};
+		AC8BC2C72FBD30000090F6DC /* KnowYourHRV Complication */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AC8BC2D22FBD30000090F6DC /* Build configuration list for PBXNativeTarget "KnowYourHRV Complication" */;
+			buildPhases = (
+				AC8BC2CD2FBD30000090F6DC /* Sources */,
+				AC8BC2CE2FBD30000090F6DC /* Frameworks */,
+				AC8BC2CF2FBD30000090F6DC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AC8BC2C62FBD30000090F6DC /* KnowYourHRV Complication */,
+			);
+			name = "KnowYourHRV Complication";
+			packageProductDependencies = (
+			);
+			productName = "KnowYourHRV Complication";
+			productReference = AC8BC2C82FBD30000090F6DC /* KnowYourHRV Complication.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -134,6 +205,22 @@
 					};
 					AC8BC2A12FBD21C40090F6DC = {
 						CreatedOnToolsVersion = 26.5;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
+						};
+					};
+					AC8BC2C72FBD30000090F6DC = {
+						CreatedOnToolsVersion = 26.5;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -153,6 +240,7 @@
 			targets = (
 				AC8BC29B2FBD21C40090F6DC /* KnowYourHRV */,
 				AC8BC2A12FBD21C40090F6DC /* KnowYourHRV Watch App */,
+				AC8BC2C72FBD30000090F6DC /* KnowYourHRV Complication */,
 			);
 		};
 /* End PBXProject section */
@@ -172,10 +260,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AC8BC2CF2FBD30000090F6DC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AC8BC29E2FBD21C40090F6DC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AC8BC2CD2FBD30000090F6DC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -189,6 +291,11 @@
 			isa = PBXTargetDependency;
 			target = AC8BC2A12FBD21C40090F6DC /* KnowYourHRV Watch App */;
 			targetProxy = AC8BC2A42FBD21C40090F6DC /* PBXContainerItemProxy */;
+		};
+		AC8BC2CB2FBD30000090F6DC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AC8BC2C72FBD30000090F6DC /* KnowYourHRV Complication */;
+			targetProxy = AC8BC2CA2FBD30000090F6DC /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -312,11 +419,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "KnowYourHRV Watch App/KnowYourHRV Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = KnowYourHRV;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "KnowYourHRV reads heart rate variability from Apple Health to show your latest HRV value.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -344,11 +453,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "KnowYourHRV Watch App/KnowYourHRV Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = KnowYourHRV;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "KnowYourHRV reads heart rate variability from Apple Health to show your latest HRV value.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -405,6 +516,71 @@
 			};
 			name = Release;
 		};
+		AC8BC2D02FBD30000090F6DC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "KnowYourHRV Complication/KnowYourHRV Complication.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "KnowYourHRV Complication/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.watchkitapp.complication;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.5;
+				WRAPPER_EXTENSION = appex;
+			};
+			name = Debug;
+		};
+		AC8BC2D12FBD30000090F6DC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "KnowYourHRV Complication/KnowYourHRV Complication.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "KnowYourHRV Complication/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.watchkitapp.complication;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.5;
+				WRAPPER_EXTENSION = appex;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -431,6 +607,15 @@
 			buildConfigurations = (
 				AC8BC2B42FBD21C50090F6DC /* Debug */,
 				AC8BC2B52FBD21C50090F6DC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AC8BC2D22FBD30000090F6DC /* Build configuration list for PBXNativeTarget "KnowYourHRV Complication" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AC8BC2D02FBD30000090F6DC /* Debug */,
+				AC8BC2D12FBD30000090F6DC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
