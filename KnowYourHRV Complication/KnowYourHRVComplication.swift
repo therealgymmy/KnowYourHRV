@@ -33,11 +33,16 @@ struct HRVComplicationEntryView: View {
     let entry: HRVComplicationEntry
 
     var body: some View {
-        Text(entry.snapshot.stateEmoji)
-            .font(.system(size: 14))
-            .lineLimit(1)
-            .widgetCurvesContent()
-            .widgetLabel(entry.snapshot.headline)
+        ZStack {
+            AccessoryWidgetBackground()
+
+            Image(systemName: entry.snapshot.stateSymbolName)
+                .font(.system(size: 15, weight: .semibold))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(entry.snapshot.symbolColor)
+                .widgetAccentable()
+        }
+        .widgetLabel(entry.snapshot.headline)
         .containerBackground(.clear, for: .widget)
     }
 }
@@ -58,7 +63,7 @@ struct KnowYourHRVComplication: Widget {
 
 struct HRVComplicationSnapshot: Codable, Equatable {
     let stateTitle: String
-    let stateEmoji: String
+    let stateSymbolName: String
     let latestMilliseconds: Double?
     let sampleDate: Date?
     let updatedAt: Date?
@@ -74,7 +79,7 @@ struct HRVComplicationSnapshot: Codable, Equatable {
 
     static let sample = HRVComplicationSnapshot(
         stateTitle: "Steady",
-        stateEmoji: "😌",
+        stateSymbolName: "checkmark.circle.fill",
         latestMilliseconds: 51,
         sampleDate: Date(),
         updatedAt: Date()
@@ -82,7 +87,7 @@ struct HRVComplicationSnapshot: Codable, Equatable {
 
     static let empty = HRVComplicationSnapshot(
         stateTitle: "No HRV",
-        stateEmoji: "--",
+        stateSymbolName: "questionmark.circle",
         latestMilliseconds: nil,
         sampleDate: nil,
         updatedAt: nil
@@ -105,6 +110,21 @@ struct HRVComplicationSnapshot: Codable, Equatable {
     private static var userDefaults: UserDefaults {
         UserDefaults(suiteName: appGroupID) ?? .standard
     }
+
+    var symbolColor: Color {
+        switch stateTitle {
+        case "Rested":
+            .green
+        case "Steady":
+            .blue
+        case "Strain":
+            .orange
+        case "Wired":
+            .red
+        default:
+            .gray
+        }
+    }
 }
 
 #Preview(as: .accessoryCorner) {
@@ -115,7 +135,7 @@ struct HRVComplicationSnapshot: Codable, Equatable {
         date: .now,
         snapshot: HRVComplicationSnapshot(
             stateTitle: "Wired",
-            stateEmoji: "😵",
+            stateSymbolName: "bolt.fill",
             latestMilliseconds: 31,
             sampleDate: .now,
             updatedAt: .now

@@ -54,18 +54,18 @@ final class HRVStore: ObservableObject {
             }
         }
 
-        var emoji: String {
+        var symbolName: String {
             switch self {
             case .rested:
-                "😎"
+                "leaf.fill"
             case .steady:
-                "😌"
+                "checkmark.circle.fill"
             case .strained:
-                "😐"
+                "waveform.path.ecg"
             case .wired:
-                "😵"
+                "bolt.fill"
             case .noBaseline:
-                "🙂"
+                "questionmark.circle"
             }
         }
 

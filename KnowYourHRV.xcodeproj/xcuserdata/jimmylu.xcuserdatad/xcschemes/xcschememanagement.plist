@@ -7,12 +7,30 @@
 		<key>KnowYourHRV Complication.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
 		<key>KnowYourHRV Watch App.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>AC8BC29B2FBD21C40090F6DC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>AC8BC2A12FBD21C40090F6DC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>AC8BC2C72FBD30000090F6DC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

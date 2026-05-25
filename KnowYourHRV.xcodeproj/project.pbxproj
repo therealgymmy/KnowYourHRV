@@ -29,17 +29,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		AC8BC2CC2FBD30000090F6DC /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				AC8BC2C92FBD30000090F6DC /* KnowYourHRV Complication.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		AC8BC2B22FBD21C50090F6DC /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -49,6 +38,17 @@
 				AC8BC2A32FBD21C40090F6DC /* KnowYourHRV Watch App.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AC8BC2CC2FBD30000090F6DC /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AC8BC2C92FBD30000090F6DC /* KnowYourHRV Complication.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -422,6 +422,7 @@
 				CODE_SIGN_ENTITLEMENTS = "KnowYourHRV Watch App/KnowYourHRV Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 67MDNB63CX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = KnowYourHRV;
@@ -433,7 +434,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.KnowYourHRV.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -456,6 +457,7 @@
 				CODE_SIGN_ENTITLEMENTS = "KnowYourHRV Watch App/KnowYourHRV Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 67MDNB63CX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = KnowYourHRV;
@@ -467,7 +469,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.KnowYourHRV.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -488,9 +490,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 67MDNB63CX;
 				INFOPLIST_KEY_CFBundleDisplayName = KnowYourHRV;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV;
+				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.KnowYourHRV;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -504,9 +507,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 67MDNB63CX;
 				INFOPLIST_KEY_CFBundleDisplayName = KnowYourHRV;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV;
+				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.KnowYourHRV;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -521,8 +525,10 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = "KnowYourHRV Complication/KnowYourHRV Complication.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 67MDNB63CX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "KnowYourHRV Complication/Info.plist";
@@ -532,8 +538,9 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.watchkitapp.complication;
+				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.KnowYourHRV.watchkitapp.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -553,8 +560,10 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = "KnowYourHRV Complication/KnowYourHRV Complication.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 67MDNB63CX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "KnowYourHRV Complication/Info.plist";
@@ -564,8 +573,9 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.watchkitapp.complication;
+				PRODUCT_BUNDLE_IDENTIFIER = realdecaf.KnowYourHRV.KnowYourHRV.watchkitapp.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

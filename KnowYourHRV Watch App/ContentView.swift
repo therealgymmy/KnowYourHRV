@@ -101,10 +101,18 @@ private struct HRVDashboardView: View {
             .frame(maxWidth: .infinity)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("\(dashboard.stressState.emoji) \(dashboard.stressState.title)")
-                    .font(.headline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                HStack(spacing: 6) {
+                    Image(systemName: dashboard.stressState.symbolName)
+                        .font(.system(size: 15, weight: .semibold))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(dashboard.stressState.symbolColor)
+                        .frame(width: 18, height: 18)
+
+                    Text(dashboard.stressState.title)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                }
 
                 Text(comparisonText)
                     .font(.caption2)
@@ -130,6 +138,23 @@ private struct HRVDashboardView: View {
             return "\(percent.formatted(.number.precision(.fractionLength(0))))% below usual"
         } else {
             return "Near your usual"
+        }
+    }
+}
+
+private extension HRVStore.StressState {
+    var symbolColor: Color {
+        switch self {
+        case .rested:
+            .green
+        case .steady:
+            .blue
+        case .strained:
+            .orange
+        case .wired:
+            .red
+        case .noBaseline:
+            .gray
         }
     }
 }

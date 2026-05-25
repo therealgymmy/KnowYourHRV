@@ -15,7 +15,7 @@ enum HRVSnapshotStore {
     static func save(_ dashboard: HRVStore.HRVDashboard, updatedAt: Date = Date()) {
         let snapshot = HRVSnapshot(
             stateTitle: dashboard.stressState.complicationTitle,
-            stateEmoji: dashboard.stressState.emoji,
+            stateSymbolName: dashboard.stressState.symbolName,
             latestMilliseconds: dashboard.latest.milliseconds,
             sampleDate: dashboard.latest.date,
             updatedAt: updatedAt
@@ -36,7 +36,7 @@ enum HRVSnapshotStore {
 
 struct HRVSnapshot: Codable, Equatable {
     let stateTitle: String
-    let stateEmoji: String
+    let stateSymbolName: String
     let latestMilliseconds: Double
     let sampleDate: Date
     let updatedAt: Date
