@@ -57,15 +57,15 @@ final class HRVStore: ObservableObject {
         var symbolName: String {
             switch self {
             case .rested:
-                "leaf.fill"
+                "sun.dust.fill"
             case .steady:
-                "checkmark.circle.fill"
+                "moon.dust.fill"
             case .strained:
-                "waveform.path.ecg"
+                "waveform.circle.fill"
             case .wired:
-                "bolt.fill"
+                "bolt.badge.clock.fill"
             case .noBaseline:
-                "questionmark.circle"
+                "questionmark.circle.fill"
             }
         }
 

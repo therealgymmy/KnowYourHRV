@@ -34,14 +34,13 @@ struct HRVComplicationEntryView: View {
 
     var body: some View {
         ZStack {
-            AccessoryWidgetBackground()
-
             Image(systemName: entry.snapshot.stateSymbolName)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(size: 26, weight: .semibold))
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(entry.snapshot.symbolColor)
                 .widgetAccentable()
         }
+        .frame(width: 28, height: 28)
         .widgetLabel(entry.snapshot.headline)
         .containerBackground(.clear, for: .widget)
     }
@@ -79,7 +78,7 @@ struct HRVComplicationSnapshot: Codable, Equatable {
 
     static let sample = HRVComplicationSnapshot(
         stateTitle: "Steady",
-        stateSymbolName: "checkmark.circle.fill",
+        stateSymbolName: "moon.dust.fill",
         latestMilliseconds: 51,
         sampleDate: Date(),
         updatedAt: Date()
@@ -87,7 +86,7 @@ struct HRVComplicationSnapshot: Codable, Equatable {
 
     static let empty = HRVComplicationSnapshot(
         stateTitle: "No HRV",
-        stateSymbolName: "questionmark.circle",
+        stateSymbolName: "questionmark.circle.fill",
         latestMilliseconds: nil,
         sampleDate: nil,
         updatedAt: nil
@@ -117,7 +116,7 @@ struct HRVComplicationSnapshot: Codable, Equatable {
             .green
         case "Steady":
             .blue
-        case "Strain":
+        case "Strained":
             .orange
         case "Wired":
             .red
@@ -135,7 +134,7 @@ struct HRVComplicationSnapshot: Codable, Equatable {
         date: .now,
         snapshot: HRVComplicationSnapshot(
             stateTitle: "Wired",
-            stateSymbolName: "bolt.fill",
+            stateSymbolName: "bolt.badge.clock.fill",
             latestMilliseconds: 31,
             sampleDate: .now,
             updatedAt: .now
