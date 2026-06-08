@@ -89,6 +89,7 @@ final class HRVStore: ObservableObject {
 
     private let healthStore = HKHealthStore()
     private var hrvType: HKQuantityType?
+    private var hrvObserverQuery: HKObserverQuery?
     private var lastRefreshDate: Date?
     private let minimumRefreshInterval: TimeInterval = 60
 
@@ -137,6 +138,7 @@ final class HRVStore: ObservableObject {
                     return
                 }
 
+                self.startBackgroundUpdates(for: hrvType)
                 self.loadLatestHRV(from: hrvType)
             }
         }
@@ -150,6 +152,7 @@ final class HRVStore: ObservableObject {
 
         state = .loading
         self.hrvType = hrvType
+        startBackgroundUpdates(for: hrvType)
         loadLatestHRV(from: hrvType)
     }
 
@@ -161,7 +164,28 @@ final class HRVStore: ObservableObject {
         return Date().timeIntervalSince(lastRefreshDate) >= minimumRefreshInterval
     }
 
-    private func loadLatestHRV(from hrvType: HKQuantityType) {
+    private func startBackgroundUpdates(for hrvType: HKQuantityType) {
+        guard hrvObserverQuery == nil else {
+            return
+        }
+
+        let query = HKObserverQuery(sampleType: hrvType, predicate: nil) { [weak self] _, completionHandler, error in
+            guard let self, error == nil else {
+                completionHandler()
+                return
+            }
+
+            Task { @MainActor [self] in
+                self.loadLatestHRV(from: hrvType, completion: completionHandler)
+            }
+        }
+
+        hrvObserverQuery = query
+        healthStore.execute(query)
+        healthStore.enableBackgroundDelivery(for: hrvType, frequency: .immediate) { _, _ in }
+    }
+
+    private func loadLatestHRV(from hrvType: HKQuantityType, completion: (() -> Void)? = nil) {
         let startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())
         let predicate = startDate.map {
             HKQuery.predicateForSamples(withStart: $0, end: nil, options: .strictStartDate)
@@ -176,6 +200,10 @@ final class HRVStore: ObservableObject {
             guard let self else { return }
 
             Task { @MainActor [self] in
+                defer {
+                    completion?()
+                }
+
                 self.lastRefreshDate = Date()
 
                 if let error {
@@ -270,5 +298,178 @@ final class HRVStore: ObservableObject {
         } else {
             return .wired
         }
+    }
+}
+
+@MainActor
+final class ActiveEnergyStore: ObservableObject {
+    enum State: Equatable {
+        case idle
+        case loading
+        case unavailable
+        case loaded(ActiveEnergyDashboard)
+        case failed
+    }
+
+    struct ActiveEnergyDashboard: Equatable {
+        let activeKilocalories: Double
+        let goalKilocalories: Double?
+        let sampleDate: Date
+
+        var progress: Double? {
+            guard let goalKilocalories, goalKilocalories > 0 else {
+                return nil
+            }
+
+            return min(max(activeKilocalories / goalKilocalories, 0), 1)
+        }
+
+        var percentComplete: Double? {
+            guard let goalKilocalories, goalKilocalories > 0 else {
+                return nil
+            }
+
+            return activeKilocalories / goalKilocalories
+        }
+    }
+
+    @Published private(set) var state: State = .idle
+
+    private let healthStore = HKHealthStore()
+    private var activeEnergyType: HKQuantityType?
+    private var activeEnergyObserverQuery: HKObserverQuery?
+    private var lastRefreshDate: Date?
+    private let minimumRefreshInterval: TimeInterval = 60
+
+    func refreshIfNeeded() {
+        guard shouldRefresh else {
+            return
+        }
+
+        guard HKHealthStore.isHealthDataAvailable() else {
+            state = .unavailable
+            return
+        }
+
+        guard let activeEnergyType = activeEnergyType ?? HKObjectType.quantityType(forIdentifier: .activeEnergyBurned) else {
+            state = .unavailable
+            return
+        }
+
+        state = .loading
+        self.activeEnergyType = activeEnergyType
+
+        let readTypes: Set<HKObjectType> = [
+            activeEnergyType,
+            HKObjectType.activitySummaryType()
+        ]
+
+        healthStore.requestAuthorization(toShare: [], read: readTypes) { [weak self] success, _ in
+            guard let self else { return }
+
+            guard success else {
+                Task { @MainActor [self] in
+                    self.state = .failed
+                }
+                return
+            }
+
+            Task { @MainActor [self] in
+                self.startBackgroundUpdates(for: activeEnergyType)
+                self.loadTodayActiveEnergy(from: activeEnergyType)
+            }
+        }
+    }
+
+    private var shouldRefresh: Bool {
+        guard let lastRefreshDate else {
+            return true
+        }
+
+        return Date().timeIntervalSince(lastRefreshDate) >= minimumRefreshInterval
+    }
+
+    private func startBackgroundUpdates(for activeEnergyType: HKQuantityType) {
+        guard activeEnergyObserverQuery == nil else {
+            return
+        }
+
+        let query = HKObserverQuery(sampleType: activeEnergyType, predicate: nil) { [weak self] _, completionHandler, error in
+            guard let self, error == nil else {
+                completionHandler()
+                return
+            }
+
+            Task { @MainActor [self] in
+                self.loadTodayActiveEnergy(from: activeEnergyType, completion: completionHandler)
+            }
+        }
+
+        activeEnergyObserverQuery = query
+        healthStore.execute(query)
+        healthStore.enableBackgroundDelivery(for: activeEnergyType, frequency: .immediate) { _, _ in }
+    }
+
+    private func loadTodayActiveEnergy(from activeEnergyType: HKQuantityType, completion: (() -> Void)? = nil) {
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfDay = calendar.startOfDay(for: now)
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
+
+        let query = HKStatisticsQuery(
+            quantityType: activeEnergyType,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum
+        ) { [weak self] _, statistics, _ in
+            guard let self else { return }
+
+            let kilocalories = statistics?
+                .sumQuantity()?
+                .doubleValue(for: .kilocalorie()) ?? 0
+
+            Task { @MainActor [self] in
+                self.loadMoveGoal(activeKilocalories: kilocalories, date: now, completion: completion)
+            }
+        }
+
+        healthStore.execute(query)
+    }
+
+    private func loadMoveGoal(activeKilocalories: Double, date: Date, completion: (() -> Void)? = nil) {
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.calendar, .era, .year, .month, .day], from: date)
+        components.calendar = calendar
+
+        let predicate = HKQuery.predicateForActivitySummary(with: components)
+        let query = HKActivitySummaryQuery(predicate: predicate) { [weak self] _, summaries, _ in
+            guard let self else { return }
+
+            let goalKilocalories = summaries?
+                .first?
+                .activeEnergyBurnedGoal
+                .doubleValue(for: .kilocalorie())
+
+            Task { @MainActor [self] in
+                defer {
+                    completion?()
+                }
+
+                self.lastRefreshDate = Date()
+                let dashboard = ActiveEnergyDashboard(
+                    activeKilocalories: activeKilocalories,
+                    goalKilocalories: goalKilocalories,
+                    sampleDate: date
+                )
+
+                ActiveCaloriesSnapshotStore.save(
+                    activeKilocalories: activeKilocalories,
+                    goalKilocalories: goalKilocalories,
+                    sampleDate: date
+                )
+                self.state = .loaded(dashboard)
+            }
+        }
+
+        healthStore.execute(query)
     }
 }

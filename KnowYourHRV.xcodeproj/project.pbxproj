@@ -426,7 +426,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = KnowYourHRV;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "KnowYourHRV reads heart rate variability from Apple Health to show your latest HRV value.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "KnowYourHRV reads heart rate variability and active energy from Apple Health to show your latest HRV and active calories.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -461,7 +461,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = KnowYourHRV;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "KnowYourHRV reads heart rate variability from Apple Health to show your latest HRV value.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "KnowYourHRV reads heart rate variability and active energy from Apple Health to show your latest HRV and active calories.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
