@@ -84,45 +84,21 @@ struct ActiveCaloriesComplicationEntryView: View {
     let entry: ActiveCaloriesComplicationEntry
 
     var body: some View {
-        ActiveCaloriesSegmentedArc(progress: entry.snapshot.gaugeValue)
-            .frame(width: 28, height: 28)
-            .widgetLabel(entry.snapshot.headline)
-            .containerBackground(.clear, for: .widget)
-    }
-}
-
-struct ActiveCaloriesSegmentedArc: View {
-    let progress: Double
-
-    private let segmentCount = 13
-    private let startAngle = -125.0
-    private let endAngle = 125.0
-
-    var body: some View {
         ZStack {
-            ForEach(0..<segmentCount, id: \.self) { index in
-                let angle = startAngle + (endAngle - startAngle) * Double(index) / Double(segmentCount - 1)
-                let isFilled = Double(index) < clampedProgress * Double(segmentCount)
+            AccessoryWidgetBackground()
 
-                Capsule()
-                    .fill(isFilled ? Color.orange : Color.secondary.opacity(0.26))
-                    .frame(width: 2.5, height: 7)
-                    .offset(y: -11)
-                    .rotationEffect(.degrees(angle))
-                    .widgetAccentable(isFilled)
+            Gauge(value: entry.snapshot.gaugeValue, in: 0...1) {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 12, weight: .semibold))
             }
-
-            Image(systemName: "flame.fill")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(.orange)
-                .widgetAccentable()
+            .gaugeStyle(.accessoryCircularCapacity)
+            .tint(.orange)
+            .widgetAccentable()
         }
+        .widgetLabel(entry.snapshot.headline)
+        .containerBackground(.clear, for: .widget)
         .accessibilityLabel("Active calories progress")
-        .accessibilityValue("\((clampedProgress * 100).formatted(.number.precision(.fractionLength(0)))) percent")
-    }
-
-    private var clampedProgress: Double {
-        min(max(progress, 0), 1)
+        .accessibilityValue(entry.snapshot.accessibilityProgressText)
     }
 }
 
@@ -238,6 +214,23 @@ struct ActiveCaloriesComplicationSnapshot: Codable, Equatable {
 
         let value = activeKilocalories.formatted(.number.precision(.fractionLength(0)))
         return "\(value) kcal"
+    }
+
+    var shortValue: String {
+        guard let activeKilocalories else {
+            return "--"
+        }
+
+        return activeKilocalories.formatted(.number.precision(.fractionLength(0)))
+    }
+
+    var accessibilityProgressText: String {
+        guard let goalKilocalories, goalKilocalories > 0 else {
+            return "Move goal unavailable"
+        }
+
+        let percent = (gaugeValue * 100).formatted(.number.precision(.fractionLength(0)))
+        return "\(percent) percent"
     }
 
     static let sample = ActiveCaloriesComplicationSnapshot(
