@@ -8,10 +8,13 @@
 import Foundation
 import Combine
 import HealthKit
+import OSLog
 
 @MainActor
 final class HRVStore: ObservableObject {
     static let shared = HRVStore()
+
+    private let logger = Logger(subsystem: "realdecaf.KnowYourHRV", category: "HRVStore")
 
     enum State: Equatable {
         case idle
@@ -96,6 +99,18 @@ final class HRVStore: ObservableObject {
     private let minimumRefreshInterval: TimeInterval = 60
 
     private init() {}
+
+    func prepareForBackgroundDelivery() {
+        guard
+            HKHealthStore.isHealthDataAvailable(),
+            let hrvType = hrvType ?? HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN)
+        else {
+            return
+        }
+
+        self.hrvType = hrvType
+        startBackgroundUpdates(for: hrvType)
+    }
 
     func refreshIfNeeded() {
         guard shouldRefresh else {
@@ -186,7 +201,15 @@ final class HRVStore: ObservableObject {
 
         hrvObserverQuery = query
         healthStore.execute(query)
-        healthStore.enableBackgroundDelivery(for: hrvType, frequency: .immediate) { _, _ in }
+        healthStore.enableBackgroundDelivery(for: hrvType, frequency: .immediate) { [logger] success, error in
+            if let error {
+                logger.error("Unable to enable HRV background delivery: \(error.localizedDescription, privacy: .public)")
+            } else if !success {
+                logger.error("HealthKit did not enable HRV background delivery")
+            } else {
+                logger.debug("Enabled HRV background delivery")
+            }
+        }
     }
 
     private func loadLatestHRV(from hrvType: HKQuantityType, completion: (() -> Void)? = nil) {
@@ -311,6 +334,8 @@ final class HRVStore: ObservableObject {
 final class ActiveEnergyStore: ObservableObject {
     static let shared = ActiveEnergyStore()
 
+    private let logger = Logger(subsystem: "realdecaf.KnowYourHRV", category: "ActiveEnergyStore")
+
     enum State: Equatable {
         case idle
         case loading
@@ -350,6 +375,18 @@ final class ActiveEnergyStore: ObservableObject {
     private let minimumRefreshInterval: TimeInterval = 60
 
     private init() {}
+
+    func prepareForBackgroundDelivery() {
+        guard
+            HKHealthStore.isHealthDataAvailable(),
+            let activeEnergyType = activeEnergyType ?? HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)
+        else {
+            return
+        }
+
+        self.activeEnergyType = activeEnergyType
+        startBackgroundUpdates(for: activeEnergyType)
+    }
 
     func refreshIfNeeded() {
         refresh()
@@ -437,7 +474,15 @@ final class ActiveEnergyStore: ObservableObject {
 
         activeEnergyObserverQuery = query
         healthStore.execute(query)
-        healthStore.enableBackgroundDelivery(for: activeEnergyType, frequency: .immediate) { _, _ in }
+        healthStore.enableBackgroundDelivery(for: activeEnergyType, frequency: .immediate) { [logger] success, error in
+            if let error {
+                logger.error("Unable to enable active-energy background delivery: \(error.localizedDescription, privacy: .public)")
+            } else if !success {
+                logger.error("HealthKit did not enable active-energy background delivery")
+            } else {
+                logger.debug("Enabled active-energy background delivery")
+            }
+        }
     }
 
     private func loadTodayActiveEnergy(from activeEnergyType: HKQuantityType, completion: (() -> Void)? = nil) {

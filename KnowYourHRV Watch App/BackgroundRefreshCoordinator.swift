@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import OSLog
 import WatchKit
 
 @MainActor
 final class BackgroundRefreshCoordinator {
     static let shared = BackgroundRefreshCoordinator()
 
+    private let logger = Logger(subsystem: "realdecaf.KnowYourHRV", category: "BackgroundRefresh")
     private let hrvStore = HRVStore.shared
     private let activeEnergyStore = ActiveEnergyStore.shared
     private let refreshInterval: TimeInterval = 15 * 60
@@ -28,6 +30,8 @@ final class BackgroundRefreshCoordinator {
         }
 
         hasStarted = true
+        hrvStore.prepareForBackgroundDelivery()
+        activeEnergyStore.prepareForBackgroundDelivery()
         refreshIfNeeded()
         scheduleNextBackgroundRefresh()
     }
@@ -77,10 +81,16 @@ final class BackgroundRefreshCoordinator {
     func scheduleNextBackgroundRefresh() {
         let preferredDate = Date(timeIntervalSinceNow: refreshInterval)
 
-        WKExtension.shared().scheduleBackgroundRefresh(
+        WKApplication.shared().scheduleBackgroundRefresh(
             withPreferredDate: preferredDate,
             userInfo: nil
-        ) { _ in }
+        ) { [logger] error in
+            if let error {
+                logger.error("Unable to schedule background refresh: \(error.localizedDescription, privacy: .public)")
+            } else {
+                logger.debug("Scheduled background refresh for \(preferredDate, privacy: .public)")
+            }
+        }
     }
 }
 
