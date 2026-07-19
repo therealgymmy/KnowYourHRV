@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct KnowYourHRV_Watch_AppApp: App {
+    @WKApplicationDelegateAdaptor(BackgroundRefreshDelegate.self) private var backgroundRefreshDelegate
+
     var body: some Scene {
         WindowGroup {
             ContentView()

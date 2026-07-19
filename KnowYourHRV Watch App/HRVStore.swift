@@ -11,6 +11,8 @@ import HealthKit
 
 @MainActor
 final class HRVStore: ObservableObject {
+    static let shared = HRVStore()
+
     enum State: Equatable {
         case idle
         case loading
@@ -93,31 +95,40 @@ final class HRVStore: ObservableObject {
     private var lastRefreshDate: Date?
     private let minimumRefreshInterval: TimeInterval = 60
 
-    func refreshIfNeeded() {
-        switch state {
-        case .idle:
-            requestAccessAndLoadLatestHRV()
-        case .loading:
-            return
-        case .unavailable:
-            return
-        case .noData, .loaded, .failed:
-            guard shouldRefresh else {
-                return
-            }
+    private init() {}
 
-            refresh()
+    func refreshIfNeeded() {
+        guard shouldRefresh else {
+            return
         }
+
+        refresh()
     }
 
-    private func requestAccessAndLoadLatestHRV() {
-        guard HKHealthStore.isHealthDataAvailable() else {
-            state = .unavailable("Health data is not available on this device.")
+    func refreshInBackground(completion: @escaping () -> Void) {
+        refresh(force: true, completion: completion)
+    }
+
+    private func refresh(force: Bool = false, completion: (() -> Void)? = nil) {
+        if !force, case .loading = state {
+            completion?()
             return
         }
 
-        guard let hrvType = HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN) else {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            state = .unavailable("Health data is not available on this device.")
+            completion?()
+            return
+        }
+
+        guard let hrvType = hrvType ?? HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN) else {
             state = .unavailable("HRV is not available on this version of watchOS.")
+            completion?()
+            return
+        }
+
+        guard force || shouldRefresh else {
+            completion?()
             return
         }
 
@@ -125,35 +136,28 @@ final class HRVStore: ObservableObject {
         self.hrvType = hrvType
 
         healthStore.requestAuthorization(toShare: [], read: [hrvType]) { [weak self] success, error in
-            guard let self else { return }
+            guard let self else {
+                completion?()
+                return
+            }
 
             Task { @MainActor [self] in
                 if let error {
                     self.state = .failed(error.localizedDescription)
+                    completion?()
                     return
                 }
 
                 guard success else {
                     self.state = .failed("Health access was not granted.")
+                    completion?()
                     return
                 }
 
                 self.startBackgroundUpdates(for: hrvType)
-                self.loadLatestHRV(from: hrvType)
+                self.loadLatestHRV(from: hrvType, completion: completion)
             }
         }
-    }
-
-    private func refresh() {
-        guard let hrvType = hrvType ?? HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN) else {
-            state = .unavailable("HRV is not available on this version of watchOS.")
-            return
-        }
-
-        state = .loading
-        self.hrvType = hrvType
-        startBackgroundUpdates(for: hrvType)
-        loadLatestHRV(from: hrvType)
     }
 
     private var shouldRefresh: Bool {
@@ -213,11 +217,13 @@ final class HRVStore: ObservableObject {
 
                 var readings = samples?
                     .compactMap { $0 as? HKQuantitySample }
-                    .map {
-                        HRVReading(
-                            milliseconds: $0.quantity.doubleValue(for: .secondUnit(with: .milli)),
-                            date: $0.endDate
-                        )
+                    .compactMap { sample -> HRVReading? in
+                        let milliseconds = sample.quantity.doubleValue(for: .secondUnit(with: .milli))
+                        guard milliseconds.isFinite, milliseconds > 0 else {
+                            return nil
+                        }
+
+                        return HRVReading(milliseconds: milliseconds, date: sample.endDate)
                     } ?? []
 
                 #if targetEnvironment(simulator)
@@ -303,6 +309,8 @@ final class HRVStore: ObservableObject {
 
 @MainActor
 final class ActiveEnergyStore: ObservableObject {
+    static let shared = ActiveEnergyStore()
+
     enum State: Equatable {
         case idle
         case loading
@@ -341,18 +349,36 @@ final class ActiveEnergyStore: ObservableObject {
     private var lastRefreshDate: Date?
     private let minimumRefreshInterval: TimeInterval = 60
 
+    private init() {}
+
     func refreshIfNeeded() {
-        guard shouldRefresh else {
+        refresh()
+    }
+
+    func refreshInBackground(completion: @escaping () -> Void) {
+        refresh(force: true, completion: completion)
+    }
+
+    private func refresh(force: Bool = false, completion: (() -> Void)? = nil) {
+        if !force, case .loading = state {
+            completion?()
             return
         }
 
         guard HKHealthStore.isHealthDataAvailable() else {
             state = .unavailable
+            completion?()
             return
         }
 
         guard let activeEnergyType = activeEnergyType ?? HKObjectType.quantityType(forIdentifier: .activeEnergyBurned) else {
             state = .unavailable
+            completion?()
+            return
+        }
+
+        guard force || shouldRefresh else {
+            completion?()
             return
         }
 
@@ -365,18 +391,22 @@ final class ActiveEnergyStore: ObservableObject {
         ]
 
         healthStore.requestAuthorization(toShare: [], read: readTypes) { [weak self] success, _ in
-            guard let self else { return }
+            guard let self else {
+                completion?()
+                return
+            }
 
             guard success else {
                 Task { @MainActor [self] in
                     self.state = .failed
+                    completion?()
                 }
                 return
             }
 
             Task { @MainActor [self] in
                 self.startBackgroundUpdates(for: activeEnergyType)
-                self.loadTodayActiveEnergy(from: activeEnergyType)
+                self.loadTodayActiveEnergy(from: activeEnergyType, completion: completion)
             }
         }
     }
@@ -420,22 +450,44 @@ final class ActiveEnergyStore: ObservableObject {
             quantityType: activeEnergyType,
             quantitySamplePredicate: predicate,
             options: .cumulativeSum
-        ) { [weak self] _, statistics, _ in
+        ) { [weak self] _, statistics, error in
             guard let self else { return }
 
-            let kilocalories = statistics?
-                .sumQuantity()?
-                .doubleValue(for: .kilocalorie()) ?? 0
-
             Task { @MainActor [self] in
-                self.loadMoveGoal(activeKilocalories: kilocalories, date: now, completion: completion)
+                if error != nil {
+                    self.lastRefreshDate = Date()
+                    self.state = .failed
+                    completion?()
+                    return
+                }
+
+                guard let activeEnergyQuantity = statistics?.sumQuantity() else {
+                    self.lastRefreshDate = Date()
+                    self.state = .loaded(
+                        ActiveEnergyDashboard(
+                            activeKilocalories: 0,
+                            goalKilocalories: nil,
+                            sampleDate: now
+                        )
+                    )
+                    completion?()
+                    return
+                }
+
+                let kilocalories = activeEnergyQuantity.doubleValue(for: .kilocalorie())
+                self.loadMoveGoal(
+                    activeKilocalories: kilocalories,
+                    date: now,
+                    saveSnapshot: true,
+                    completion: completion
+                )
             }
         }
 
         healthStore.execute(query)
     }
 
-    private func loadMoveGoal(activeKilocalories: Double, date: Date, completion: (() -> Void)? = nil) {
+    private func loadMoveGoal(activeKilocalories: Double, date: Date, saveSnapshot: Bool, completion: (() -> Void)? = nil) {
         let calendar = Calendar.current
         var components = calendar.dateComponents([.calendar, .era, .year, .month, .day], from: date)
         components.calendar = calendar
@@ -461,11 +513,14 @@ final class ActiveEnergyStore: ObservableObject {
                     sampleDate: date
                 )
 
-                ActiveCaloriesSnapshotStore.save(
-                    activeKilocalories: activeKilocalories,
-                    goalKilocalories: goalKilocalories,
-                    sampleDate: date
-                )
+                if saveSnapshot {
+                    ActiveCaloriesSnapshotStore.save(
+                        activeKilocalories: activeKilocalories,
+                        goalKilocalories: goalKilocalories,
+                        sampleDate: date
+                    )
+                }
+
                 self.state = .loaded(dashboard)
             }
         }

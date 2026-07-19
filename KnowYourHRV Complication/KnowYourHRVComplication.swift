@@ -156,21 +156,54 @@ struct HRVComplicationSnapshot: Codable, Equatable {
     )
 
     static func load() -> HRVComplicationSnapshot {
-        guard
-            let data = userDefaults.data(forKey: snapshotKey),
-            let snapshot = try? JSONDecoder().decode(HRVComplicationSnapshot.self, from: data)
-        else {
-            return .empty
+        if let snapshot = loadFromFile(), snapshot.isValid {
+            return snapshot
         }
 
-        return snapshot
+        if let snapshot = loadFromDefaults(), snapshot.isValid {
+            return snapshot
+        }
+
+        return .empty
     }
 
     private static let appGroupID = "group.realdecaf.KnowYourHRV"
     private static let snapshotKey = "latestHRVSnapshot"
+    private static let snapshotFileName = "latestHRVSnapshot.json"
 
-    private static var userDefaults: UserDefaults {
-        UserDefaults(suiteName: appGroupID) ?? .standard
+    private static var userDefaults: UserDefaults? {
+        UserDefaults(suiteName: appGroupID)
+    }
+
+    private static func loadFromDefaults() -> HRVComplicationSnapshot? {
+        guard let data = userDefaults?.data(forKey: snapshotKey) else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(HRVComplicationSnapshot.self, from: data)
+    }
+
+    private static func loadFromFile() -> HRVComplicationSnapshot? {
+        guard
+            let directoryURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID),
+            let data = try? Data(
+                contentsOf: directoryURL
+                    .appendingPathComponent("Snapshots", isDirectory: true)
+                    .appendingPathComponent(snapshotFileName)
+            )
+        else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(HRVComplicationSnapshot.self, from: data)
+    }
+
+    private var isValid: Bool {
+        guard let latestMilliseconds else {
+            return false
+        }
+
+        return latestMilliseconds.isFinite && latestMilliseconds > 0
     }
 
     var symbolColor: Color {
@@ -248,21 +281,59 @@ struct ActiveCaloriesComplicationSnapshot: Codable, Equatable {
     )
 
     static func load() -> ActiveCaloriesComplicationSnapshot {
-        guard
-            let data = userDefaults.data(forKey: snapshotKey),
-            let snapshot = try? JSONDecoder().decode(ActiveCaloriesComplicationSnapshot.self, from: data)
-        else {
-            return .empty
+        if let snapshot = loadFromFile(), snapshot.isValid {
+            return snapshot
         }
 
-        return snapshot
+        if let snapshot = loadFromDefaults(), snapshot.isValid {
+            return snapshot
+        }
+
+        return .empty
     }
 
     private static let appGroupID = "group.realdecaf.KnowYourHRV"
     private static let snapshotKey = "latestActiveCaloriesSnapshot"
+    private static let snapshotFileName = "latestActiveCaloriesSnapshot.json"
 
-    private static var userDefaults: UserDefaults {
-        UserDefaults(suiteName: appGroupID) ?? .standard
+    private static var userDefaults: UserDefaults? {
+        UserDefaults(suiteName: appGroupID)
+    }
+
+    private static func loadFromDefaults() -> ActiveCaloriesComplicationSnapshot? {
+        guard let data = userDefaults?.data(forKey: snapshotKey) else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(ActiveCaloriesComplicationSnapshot.self, from: data)
+    }
+
+    private static func loadFromFile() -> ActiveCaloriesComplicationSnapshot? {
+        guard
+            let directoryURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID),
+            let data = try? Data(
+                contentsOf: directoryURL
+                    .appendingPathComponent("Snapshots", isDirectory: true)
+                    .appendingPathComponent(snapshotFileName)
+            )
+        else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(ActiveCaloriesComplicationSnapshot.self, from: data)
+    }
+
+    private var isValid: Bool {
+        guard
+            let activeKilocalories,
+            let sampleDate,
+            activeKilocalories.isFinite,
+            activeKilocalories > 0
+        else {
+            return false
+        }
+
+        return Calendar.current.isDate(sampleDate, inSameDayAs: Date())
     }
 }
 

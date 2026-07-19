@@ -9,8 +9,18 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @StateObject private var hrvStore = HRVStore()
-    @StateObject private var activeEnergyStore = ActiveEnergyStore()
+    @ObservedObject private var hrvStore: HRVStore
+    @ObservedObject private var activeEnergyStore: ActiveEnergyStore
+
+    @MainActor
+    init() {
+        self.init(hrvStore: .shared, activeEnergyStore: .shared)
+    }
+
+    init(hrvStore: HRVStore, activeEnergyStore: ActiveEnergyStore) {
+        _hrvStore = ObservedObject(wrappedValue: hrvStore)
+        _activeEnergyStore = ObservedObject(wrappedValue: activeEnergyStore)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
