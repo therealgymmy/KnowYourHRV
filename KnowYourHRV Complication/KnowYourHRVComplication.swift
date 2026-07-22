@@ -5,6 +5,7 @@
 //  Created by OpenAI on 5/23/26.
 //
 
+import HealthKit
 import SwiftUI
 import WidgetKit
 
@@ -14,13 +15,23 @@ struct HRVComplicationProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (HRVComplicationEntry) -> Void) {
-        completion(HRVComplicationEntry(date: Date(), snapshot: HRVComplicationSnapshot.load()))
+        guard !context.isPreview else {
+            completion(HRVComplicationEntry(date: Date(), snapshot: .sample))
+            return
+        }
+
+        ComplicationHealthDataLoader.loadHRV { snapshot in
+            completion(HRVComplicationEntry(date: Date(), snapshot: snapshot))
+        }
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<HRVComplicationEntry>) -> Void) {
-        let entry = HRVComplicationEntry(date: Date(), snapshot: HRVComplicationSnapshot.load())
-        let nextRefresh = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
-        completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
+        ComplicationHealthDataLoader.loadHRV { snapshot in
+            let now = Date()
+            let entry = HRVComplicationEntry(date: now, snapshot: snapshot)
+            let nextRefresh = Calendar.current.date(byAdding: .minute, value: 15, to: now) ?? now
+            completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
+        }
     }
 }
 
@@ -65,13 +76,172 @@ struct ActiveCaloriesComplicationProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (ActiveCaloriesComplicationEntry) -> Void) {
-        completion(ActiveCaloriesComplicationEntry(date: Date(), snapshot: ActiveCaloriesComplicationSnapshot.load()))
+        guard !context.isPreview else {
+            completion(ActiveCaloriesComplicationEntry(date: Date(), snapshot: .sample))
+            return
+        }
+
+        ComplicationHealthDataLoader.loadActiveCalories { snapshot in
+            completion(ActiveCaloriesComplicationEntry(date: Date(), snapshot: snapshot))
+        }
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<ActiveCaloriesComplicationEntry>) -> Void) {
-        let entry = ActiveCaloriesComplicationEntry(date: Date(), snapshot: ActiveCaloriesComplicationSnapshot.load())
-        let nextRefresh = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
-        completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
+        ComplicationHealthDataLoader.loadActiveCalories { snapshot in
+            let now = Date()
+            let entry = ActiveCaloriesComplicationEntry(date: now, snapshot: snapshot)
+            let nextRefresh = Calendar.current.date(byAdding: .minute, value: 15, to: now) ?? now
+            completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
+        }
+    }
+}
+
+private enum ComplicationHealthDataLoader {
+    private static let healthStore = HKHealthStore()
+
+    static func loadHRV(completion: @escaping (HRVComplicationSnapshot) -> Void) {
+        guard
+            HKHealthStore.isHealthDataAvailable(),
+            let hrvType = HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN)
+        else {
+            completion(HRVComplicationSnapshot.load())
+            return
+        }
+
+        let startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())
+        let predicate = startDate.map {
+            HKQuery.predicateForSamples(withStart: $0, end: nil, options: .strictStartDate)
+        }
+        let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+        let query = HKSampleQuery(
+            sampleType: hrvType,
+            predicate: predicate,
+            limit: HKObjectQueryNoLimit,
+            sortDescriptors: [sort]
+        ) { _, samples, error in
+            guard error == nil else {
+                completion(HRVComplicationSnapshot.load())
+                return
+            }
+
+            let readings = samples?
+                .compactMap { $0 as? HKQuantitySample }
+                .compactMap { sample -> (milliseconds: Double, date: Date)? in
+                    let milliseconds = sample.quantity.doubleValue(for: .secondUnit(with: .milli))
+                    guard milliseconds.isFinite, milliseconds > 0 else {
+                        return nil
+                    }
+
+                    return (milliseconds, sample.endDate)
+                }
+                .sorted { $0.date > $1.date } ?? []
+
+            guard let latest = readings.first else {
+                completion(HRVComplicationSnapshot.load())
+                return
+            }
+
+            let baselineValues = readings.dropFirst().map(\.milliseconds).sorted()
+            let trimmedValues: ArraySlice<Double>
+
+            if baselineValues.count >= 7 {
+                trimmedValues = baselineValues.dropFirst().dropLast()
+            } else {
+                trimmedValues = baselineValues[...]
+            }
+
+            let baseline = trimmedValues.count >= 3
+                ? trimmedValues.reduce(0, +) / Double(trimmedValues.count)
+                : nil
+            let percentFromBaseline = baseline.map { (latest.milliseconds - $0) / $0 }
+            let presentation = hrvPresentation(percentFromBaseline: percentFromBaseline)
+
+            completion(
+                HRVComplicationSnapshot(
+                    stateTitle: presentation.title,
+                    stateSymbolName: presentation.symbolName,
+                    latestMilliseconds: latest.milliseconds,
+                    sampleDate: latest.date,
+                    updatedAt: Date()
+                )
+            )
+        }
+
+        healthStore.execute(query)
+    }
+
+    static func loadActiveCalories(completion: @escaping (ActiveCaloriesComplicationSnapshot) -> Void) {
+        guard
+            HKHealthStore.isHealthDataAvailable(),
+            let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)
+        else {
+            completion(ActiveCaloriesComplicationSnapshot.load())
+            return
+        }
+
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfDay = calendar.startOfDay(for: now)
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
+        let query = HKStatisticsQuery(
+            quantityType: activeEnergyType,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum
+        ) { _, statistics, error in
+            guard error == nil else {
+                completion(ActiveCaloriesComplicationSnapshot.load())
+                return
+            }
+
+            let activeKilocalories = statistics?
+                .sumQuantity()?
+                .doubleValue(for: .kilocalorie()) ?? 0
+            loadMoveGoal(for: now) { goalKilocalories in
+                completion(
+                    ActiveCaloriesComplicationSnapshot(
+                        activeKilocalories: activeKilocalories,
+                        goalKilocalories: goalKilocalories,
+                        sampleDate: now,
+                        updatedAt: Date()
+                    )
+                )
+            }
+        }
+
+        healthStore.execute(query)
+    }
+
+    private static func loadMoveGoal(for date: Date, completion: @escaping (Double?) -> Void) {
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.calendar, .era, .year, .month, .day], from: date)
+        components.calendar = calendar
+
+        let predicate = HKQuery.predicateForActivitySummary(with: components)
+        let query = HKActivitySummaryQuery(predicate: predicate) { _, summaries, _ in
+            let goalKilocalories = summaries?
+                .first?
+                .activeEnergyBurnedGoal
+                .doubleValue(for: .kilocalorie())
+            completion(goalKilocalories)
+        }
+
+        healthStore.execute(query)
+    }
+
+    private static func hrvPresentation(percentFromBaseline: Double?) -> (title: String, symbolName: String) {
+        guard let percentFromBaseline else {
+            return ("HRV", "questionmark.circle.fill")
+        }
+
+        if percentFromBaseline >= 0.15 {
+            return ("Rested", "sun.dust.fill")
+        } else if percentFromBaseline >= -0.10 {
+            return ("Steady", "moon.dust.fill")
+        } else if percentFromBaseline >= -0.25 {
+            return ("Strain", "waveform.circle.fill")
+        } else {
+            return ("Wired", "bolt.badge.clock.fill")
+        }
     }
 }
 
