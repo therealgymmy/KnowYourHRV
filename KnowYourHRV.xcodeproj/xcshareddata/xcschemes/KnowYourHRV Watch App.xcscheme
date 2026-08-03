@@ -61,7 +61,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AC8BC2A12FBD21C40090F6DC"
             BuildableName = "KnowYourHRV Watch App.app"
-            BlueprintName = "KnowYourHRV Watch App"
             ReferencedContainer = "container:KnowYourHRV.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -78,7 +77,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AC8BC2A12FBD21C40090F6DC"
             BuildableName = "KnowYourHRV Watch App.app"
-            BlueprintName = "KnowYourHRV Watch App"
             ReferencedContainer = "container:KnowYourHRV.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

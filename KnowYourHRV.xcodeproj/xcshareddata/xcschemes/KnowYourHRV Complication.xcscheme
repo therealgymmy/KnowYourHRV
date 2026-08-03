@@ -78,7 +78,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AC8BC2C72FBD30000090F6DC"
             BuildableName = "KnowYourHRV Complication.appex"
-            BlueprintName = "KnowYourHRV Complication"
             ReferencedContainer = "container:KnowYourHRV.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -121,7 +120,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AC8BC2C72FBD30000090F6DC"
             BuildableName = "KnowYourHRV Complication.appex"
-            BlueprintName = "KnowYourHRV Complication"
             ReferencedContainer = "container:KnowYourHRV.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
